@@ -16,6 +16,7 @@ export default function SeletorPrioridade({
     <div className="campo-prioridade">
       <label htmlFor={id}>Prioridade</label>
 
+      {/* Componente controlado: o pai guarda valor e recebe alterações via onChange. */}
       <select
         id={id}
         value={valor}

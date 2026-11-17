@@ -1,17 +1,22 @@
+// A mesma validação é usada na importação e na leitura do armazenamento.
+import { ehTarefa } from './utils/validarTarefa';
+// ChangeEvent descreve a troca de arquivo; import type não gera JavaScript.
+import type { ChangeEvent } from 'react';
+import { useState } from 'react';
+import { useTarefas } from './hooks/useTarefas';
 import SeletorPrioridade from './components/SeletorPrioridade';
 import FormularioEdicao from './components/FormularioEdicao';
 // O formato da tarefa é compartilhado com ItemTarefa, sem duplicar a definição.
 import type { Prioridade, Tarefa } from './types/Tarefa';
 import ItemTarefa from './components/ItemTarefa';
 import ResumoTarefas from './components/ResumoTarefas';
-
-// useState guarda dados do componente; useEffect sincroniza com sistemas externos.
-import { useEffect, useState } from 'react';
 // Importa somente o tipo do evento, usado pelo TypeScript para verificar o código.
 import type { FormEvent } from 'react';
 import './App.css';
 
 function App() {
+  // Mostra o resultado da importação na interface.
+  const [mensagemImportacao, setMensagemImportacao] = useState('');
   // Guarda a última tarefa excluída para permitir recuperá-la.
   const [tarefaExcluida, setTarefaExcluida] =
     useState<Tarefa | null>(null);
@@ -30,25 +35,8 @@ function App() {
     useState<Prioridade>('media');
   // A união de tipos aceita somente estes três nomes de filtro.
   const [filtro, setFiltro] = useState<'todas' | 'pendentes' | 'concluidas'>('todas');
-  // Inicialização preguiçosa: lê o armazenamento ao inicializar o estado,
-  // em vez de repetir a leitura a cada renderização.
-  const [tarefas, setTarefas] = useState<Tarefa[]>(() => {
-    try {
-      const salvas = localStorage.getItem('tarefas');
-
-      // localStorage guarda texto; JSON.parse reconstrói a lista de objetos.
-      return salvas ? JSON.parse(salvas) : [];
-    } catch {
-      // Se o acesso ou a conversão falhar, começa com uma lista vazia.
-      return [];
-    }
-  });
-
-  // Salva após a renderização inicial e quando a referência de tarefas muda.
-  // JSON.stringify converte a lista para o texto aceito pelo localStorage.
-  useEffect(() => {
-    localStorage.setItem('tarefas', JSON.stringify(tarefas));
-  }, [tarefas]);
+  // O hook fornece a lista e cuida de carregar e salvar as tarefas.
+  const { tarefas, setTarefas } = useTarefas();
 
   function adicionarTarefa(evento: FormEvent<HTMLFormElement>) {
     // Evita a navegação/recarregamento padrão do envio de um formulário.
@@ -92,6 +80,7 @@ function App() {
 
     if (!tarefa) return;
 
+    // Guarda somente a última exclusão individual, até desfazer ou recarregar.
     setTarefaExcluida(tarefa);
 
     // Fecha a edição se ela pertencer à tarefa removida.
@@ -110,6 +99,7 @@ function App() {
 
     // Devolve a tarefa à lista sem duplicar seu ID.
     setTarefas((atuais) =>
+      // some retorna true se já houver uma tarefa com esse ID.
       atuais.some((tarefa) => tarefa.id === tarefaParaRestaurar.id)
         ? atuais
         : [...atuais, tarefaParaRestaurar]
@@ -171,6 +161,7 @@ function App() {
     // Exibe a tarefa somente se ela atender à busca E ao filtro de situação.
     return correspondeAoTexto && correspondeAoFiltro;
   }).sort((a, b) => {
+    // sort modifica o array recebido, mas filter criou uma cópia do estado.
     // Compara os pesos para ordenar: alta, média e baixa.
     return (
       ordemPrioridade[a.prioridade ?? 'media'] -
@@ -189,6 +180,7 @@ function App() {
   ).length;
 
   function limparConcluidas() {
+    // Esta remoção em lote não participa do Desfazer da exclusão individual.
     // Mantém apenas as tarefas que ainda estão pendentes.
     setTarefas((atuais) =>
       atuais.filter((tarefa) => !tarefa.concluida)
@@ -196,6 +188,82 @@ function App() {
 
     // Fecha qualquer formulário de edição aberto.
     setIdEmEdicao(null);
+  }
+
+  function exportarTarefas() {
+    // Converte a lista para JSON com indentação para facilitar a leitura.
+    // null mantém a conversão padrão; 2 define dois espaços de indentação.
+    const conteudo = JSON.stringify(tarefas, null, 2);
+
+    // Blob representa um arquivo em memória.
+    const arquivo = new Blob([conteudo], {
+      type: 'application/json',
+    });
+
+    // Cria um endereço temporário para baixar esse arquivo.
+    const url = URL.createObjectURL(arquivo);
+    const link = document.createElement('a');
+
+    // A âncora é temporária: configura o download, dispara o clique e sai do DOM.
+    link.href = url;
+    link.download = 'minhas-tarefas.json';
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+
+    // Libera o endereço após dar tempo para o download começar.
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+
+  async function importarTarefas(evento: ChangeEvent<HTMLInputElement>) {
+    // ?. evita acessar o índice se files não existir; [0] pega o primeiro arquivo.
+    const arquivo = evento.target.files?.[0];
+
+    // Limpa a seleção para permitir escolher o mesmo arquivo novamente.
+    evento.target.value = '';
+
+    // Cancelar a seleção não altera a lista.
+    if (!arquivo) return;
+
+    try {
+      // Ler um arquivo é assíncrono: await aguarda o conteúdo.
+      const conteudo = await arquivo.text();
+      // unknown impede assumir que um JSON externo já possui o formato Tarefa[].
+      const dados: unknown = JSON.parse(conteudo);
+
+      // Rejeita o arquivo inteiro se algum item for inválido.
+      // Array.isArray exige uma lista; every exige que TODOS os itens sejam válidos.
+      // O retorno antecipado acontece antes de qualquer mudança nas tarefas.
+      if (!Array.isArray(dados) || !dados.every(ehTarefa)) {
+        setMensagemImportacao('O arquivo não contém uma lista válida de tarefas.');
+        return;
+      }
+
+      setTarefas((atuais) => {
+        // O atualizador recebe a lista mais recente, mesmo após o await.
+        // Set guarda valores únicos; map extrai apenas os IDs das tarefas atuais.
+        const ids = new Set(atuais.map((tarefa) => tarefa.id));
+
+        // Preserva as tarefas atuais e evita IDs repetidos, inclusive no arquivo.
+        const novas = dados.filter((tarefa) => {
+          if (ids.has(tarefa.id)) return false;
+
+          // Registra o ID aceito para rejeitar outra ocorrência no mesmo arquivo.
+          ids.add(tarefa.id);
+          return true;
+        });
+
+        // Mescla sem sobrescrever tarefas existentes, mesmo que o texto seja diferente.
+        return [...atuais, ...novas];
+      });
+
+      setMensagemImportacao(
+        'Importação concluída. IDs já existentes foram mantidos sem alteração.'
+      );
+    } catch {
+      // Captura falhas ao ler o arquivo ou converter um texto JSON malformado.
+      setMensagemImportacao('Não foi possível ler o arquivo JSON.');
+    }
   }
 
   // Somente o JSX retornado participa da interface deste componente.
@@ -218,6 +286,24 @@ function App() {
       >
         Limpar concluídas
       </button>
+      {/* Baixa uma cópia de todas as tarefas, independentemente do filtro. */}
+      <button type="button" onClick={exportarTarefas}>
+        Exportar tarefas
+      </button>
+      {/* accept orienta o seletor de arquivos; a validação real ocorre na função. */}
+      <div className="busca">
+        <label htmlFor="importar-tarefas">Importar tarefas de um arquivo JSON</label>
+
+        <input
+          id="importar-tarefas"
+          type="file"
+          accept=".json,application/json"
+          onChange={importarTarefas}
+        />
+      </div>
+
+      {/* role="status" permite anunciar mudanças a quem usa leitor de tela. */}
+      <p role="status">{mensagemImportacao}</p>
 
       {/* onSubmit aceita tanto o clique no botão quanto Enter no campo. */}
       {/* htmlFor liga o rótulo ao input de mesmo id. */}
@@ -277,7 +363,6 @@ function App() {
         <p>{termoBusca ? 'Nenhuma tarefa encontrada para esta busca e filtro.' : 'Nenhuma tarefa neste filtro.'}</p>
       )}
 
-      {/* map transforma os dados em elementos. key identifica cada item para o React. */}
       {/* Mostra o aviso somente quando existe uma tarefa para recuperar. */}
       {tarefaExcluida && (
         <div className="aviso-exclusao" role="status">
@@ -288,6 +373,7 @@ function App() {
           </button>
         </div>
       )}
+      {/* map transforma os dados em elementos. key identifica cada item para o React. */}
       <ul>
         {tarefasFiltradas.map((tarefa) => (
           <li key={tarefa.id}>

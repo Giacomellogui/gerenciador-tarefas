@@ -10,7 +10,8 @@ export default function ResumoTarefas({
     concluidas,
     total,
 }: ResumoTarefasProps) {
-    // Evita dividir por zero quando não existem tarefas.
+    // Valor derivado das props: não precisa de estado ou efeito próprio.
+    // Evita dividir por zero; Math.round arredonda para uma porcentagem inteira.
     const percentual = total === 0
         ? 0
         : Math.round((concluidas / total) * 100);
@@ -21,6 +22,7 @@ export default function ResumoTarefas({
                 Progresso: {percentual}%
             </label>
 
+            {/* A barra usa as contagens reais; total || 1 garante máximo positivo. */}
             <progress
                 id="progresso-tarefas"
                 value={concluidas}
