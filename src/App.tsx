@@ -1,19 +1,19 @@
+// O formato da tarefa é compartilhado com ItemTarefa, sem duplicar a definição.
+import type { Tarefa } from './types/Tarefa';
+import ItemTarefa from './components/ItemTarefa';
+import ResumoTarefas from './components/ResumoTarefas';
+
 // useState guarda dados do componente; useEffect sincroniza com sistemas externos.
 import { useEffect, useState } from 'react';
 // Importa somente o tipo do evento, usado pelo TypeScript para verificar o código.
 import type { FormEvent } from 'react';
 import './App.css';
 
-// Define o formato de cada objeto da lista. Tipos não validam dados em execução.
-type Tarefa = {
-  id: string;
-  texto: string;
-  concluida: boolean;
-};
-
 function App() {
   // Texto controlado pelo campo de criação. O setter atualiza o estado e a tela.
   const [novaTarefa, setNovaTarefa] = useState('');
+  // Texto digitado no campo de busca.
+  const [busca, setBusca] = useState('');
   // null significa que nenhuma tarefa está sendo editada.
   const [idEmEdicao, setIdEmEdicao] = useState<string | null>(null);
   // Rascunho separado do texto salvo: cancelar não altera a tarefa original.
@@ -105,10 +105,22 @@ function App() {
 
   // Dados derivados: calculados em cada renderização, sem outro useState.
   // Filtrar a visualização não remove nada da lista original.
+  // Ignora espaços nas pontas da busca e diferenças entre maiúsculas/minúsculas.
+  const termoBusca = busca.trim().toLocaleLowerCase('pt-BR');
+
   const tarefasFiltradas = tarefas.filter((tarefa) => {
-    if (filtro === 'pendentes') return !tarefa.concluida;
-    if (filtro === 'concluidas') return tarefa.concluida;
-    return true;
+    // includes aceita trechos do texto; uma busca vazia corresponde a qualquer texto.
+    const correspondeAoTexto = tarefa.texto
+      .toLocaleLowerCase('pt-BR')
+      .includes(termoBusca);
+
+    const correspondeAoFiltro =
+      filtro === 'todas' ||
+      (filtro === 'pendentes' && !tarefa.concluida) ||
+      (filtro === 'concluidas' && tarefa.concluida);
+
+    // Exibe a tarefa somente se ela atender à busca E ao filtro de situação.
+    return correspondeAoTexto && correspondeAoFiltro;
   });
 
   // Conta todas as pendentes, independentemente do filtro selecionado na tela.
@@ -126,9 +138,11 @@ function App() {
     <main>
       <h1>Minhas tarefas</h1>
       <p>Organize seu dia, uma tarefa por vez.</p>
-      <p>Tarefas pendentes: {totalPendentes}</p>
-      {/* Exibe o total calculado a partir da lista de tarefas. */}
-      <p>Tarefas concluídas: {totalConcluidas}</p>
+      <ResumoTarefas
+        pendentes={totalPendentes}
+        concluidas={totalConcluidas}
+        total={tarefas.length}
+      />
 
       {/* onSubmit aceita tanto o clique no botão quanto Enter no campo. */}
       {/* htmlFor liga o rótulo ao input de mesmo id. */}
@@ -150,6 +164,18 @@ function App() {
         </button>
       </form>
 
+      {/* A digitação atualiza busca e recalcula a lista sem alterar as tarefas salvas. */}
+      <div className="busca">
+        <label htmlFor="buscar-tarefas">Buscar tarefas</label>
+        <input
+          id="buscar-tarefas"
+          type="search"
+          placeholder="Digite parte do texto"
+          value={busca}
+          onChange={(evento) => setBusca(evento.target.value)}
+        />
+      </div>
+
       {/* aria-pressed informa a seleção e também é usado pelo CSS para destacá-la. */}
       <div className="filtros" role="group" aria-label="Filtrar tarefas">
         <button type="button" aria-pressed={filtro === 'todas'} onClick={() => setFiltro('todas')}>
@@ -164,7 +190,9 @@ function App() {
       </div>
 
       {/* && mostra a mensagem somente quando a condição à esquerda é verdadeira. */}
-      {tarefasFiltradas.length === 0 && <p>Nenhuma tarefa neste filtro.</p>}
+      {tarefasFiltradas.length === 0 && (
+        <p>{termoBusca ? 'Nenhuma tarefa encontrada para esta busca e filtro.' : 'Nenhuma tarefa neste filtro.'}</p>
+      )}
 
       {/* map transforma os dados em elementos. key identifica cada item para o React. */}
       <ul>
@@ -191,40 +219,13 @@ function App() {
                 </button>
               </form>
             ) : (
-              // Fragment agrupa elementos sem criar uma div extra no HTML.
-              <>
-                <label className="tarefa">
-                  {/* checked é o estado da caixa; onChange alterna a tarefa pelo ID. */}
-                  <input
-                    type="checkbox"
-                    checked={tarefa.concluida}
-                    onChange={() => alternarTarefa(tarefa.id)}
-                  />
-
-                  {/* className aplica o estilo riscado somente às concluídas. */}
-                  <span className={tarefa.concluida ? 'concluida' : ''}>
-                    {tarefa.texto}
-                  </span>
-                </label>
-
-                {/* A função de clique só executa ao clicar; aria-label descreve a ação. */}
-                <button
-                  type="button"
-                  onClick={() => iniciarEdicao(tarefa)}
-                  aria-label={`Editar tarefa: ${tarefa.texto}`}
-                >
-                  Editar
-                </button>
-
-                <button
-                  type="button"
-                  className="excluir"
-                  onClick={() => excluirTarefa(tarefa.id)}
-                  aria-label={`Excluir tarefa: ${tarefa.texto}`}
-                >
-                  Excluir
-                </button>
-              </>
+              // Envia os dados e as ações ao cartão; o estado continua no App.
+              <ItemTarefa
+                tarefa={tarefa}
+                onAlternar={alternarTarefa}
+                onEditar={() => iniciarEdicao(tarefa)}
+                onExcluir={excluirTarefa}
+              />
             )}
           </li>
         ))}
