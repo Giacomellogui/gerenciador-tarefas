@@ -122,6 +122,13 @@ function App() {
   // Ignora espaços nas pontas da busca e diferenças entre maiúsculas/minúsculas.
   const termoBusca = busca.trim().toLocaleLowerCase('pt-BR');
 
+  // Quanto menor o número, mais cedo a prioridade aparece na lista.
+  const ordemPrioridade = {
+    alta: 0,
+    media: 1,
+    baixa: 2,
+  };
+
   const tarefasFiltradas = tarefas.filter((tarefa) => {
     // includes aceita trechos do texto; uma busca vazia corresponde a qualquer texto.
     const correspondeAoTexto = tarefa.texto
@@ -135,6 +142,12 @@ function App() {
 
     // Exibe a tarefa somente se ela atender à busca E ao filtro de situação.
     return correspondeAoTexto && correspondeAoFiltro;
+  }).sort((a, b) => {
+    // Compara os pesos para ordenar: alta, média e baixa.
+    return (
+      ordemPrioridade[a.prioridade ?? 'media'] -
+      ordemPrioridade[b.prioridade ?? 'media']
+    );
   });
 
   // Conta todas as pendentes, independentemente do filtro selecionado na tela.
@@ -147,6 +160,16 @@ function App() {
     (tarefa) => tarefa.concluida
   ).length;
 
+  function limparConcluidas() {
+    // Mantém apenas as tarefas que ainda estão pendentes.
+    setTarefas((atuais) =>
+      atuais.filter((tarefa) => !tarefa.concluida)
+    );
+
+    // Fecha qualquer formulário de edição aberto.
+    setIdEmEdicao(null);
+  }
+
   // Somente o JSX retornado participa da interface deste componente.
   return (
     <main>
@@ -157,6 +180,16 @@ function App() {
         concluidas={totalConcluidas}
         total={tarefas.length}
       />
+
+      {/* Só permite limpar quando existe alguma tarefa concluída. */}
+      <button
+        type="button"
+        className="excluir"
+        disabled={totalConcluidas === 0}
+        onClick={limparConcluidas}
+      >
+        Limpar concluídas
+      </button>
 
       {/* onSubmit aceita tanto o clique no botão quanto Enter no campo. */}
       {/* htmlFor liga o rótulo ao input de mesmo id. */}
