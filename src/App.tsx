@@ -10,6 +10,9 @@ import type { FormEvent } from 'react';
 import './App.css';
 
 function App() {
+  // Guarda a última tarefa excluída para permitir recuperá-la.
+  const [tarefaExcluida, setTarefaExcluida] =
+    useState<Tarefa | null>(null);
   // Texto controlado pelo campo de criação. O setter atualiza o estado e a tela.
   const [novaTarefa, setNovaTarefa] = useState('');
   // Prioridade escolhida para a próxima tarefa.
@@ -83,12 +86,36 @@ function App() {
   }
 
   function excluirTarefa(id: string) {
-    // Encerra a edição se a tarefa removida estiver sendo editada.
+    // Busca o objeto antes de removê-lo da lista.
+    const tarefa = tarefas.find((tarefa) => tarefa.id === id);
+
+    if (!tarefa) return;
+
+    setTarefaExcluida(tarefa);
+
+    // Fecha a edição se ela pertencer à tarefa removida.
     if (idEmEdicao === id) setIdEmEdicao(null);
-    // filter mantém apenas os objetos com um ID diferente do removido.
+
     setTarefas((atuais) =>
       atuais.filter((tarefa) => tarefa.id !== id)
     );
+  }
+
+  function desfazerExclusao() {
+    // Sem uma tarefa guardada, não há nada para recuperar.
+    if (!tarefaExcluida) return;
+
+    const tarefaParaRestaurar = tarefaExcluida;
+
+    // Devolve a tarefa à lista sem duplicar seu ID.
+    setTarefas((atuais) =>
+      atuais.some((tarefa) => tarefa.id === tarefaParaRestaurar.id)
+        ? atuais
+        : [...atuais, tarefaParaRestaurar]
+    );
+
+    // Limpa a recuperação após desfazer.
+    setTarefaExcluida(null);
   }
 
   function iniciarEdicao(tarefa: Tarefa) {
@@ -264,6 +291,16 @@ function App() {
       )}
 
       {/* map transforma os dados em elementos. key identifica cada item para o React. */}
+      {/* Mostra o aviso somente quando existe uma tarefa para recuperar. */}
+      {tarefaExcluida && (
+        <div className="aviso-exclusao" role="status">
+          <span>Tarefa excluída: {tarefaExcluida.texto}</span>
+
+          <button type="button" onClick={desfazerExclusao}>
+            Desfazer
+          </button>
+        </div>
+      )}
       <ul>
         {tarefasFiltradas.map((tarefa) => (
           <li key={tarefa.id}>

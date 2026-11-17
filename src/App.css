@@ -200,3 +200,16 @@ select {
   background: #4c202b;
   color: #fecdd3;
 }
+
+/* Organiza a mensagem e permite quebrar a linha em telas pequenas. */
+.aviso-exclusao {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-top: 20px;
+  padding: 12px;
+  border: 1px solid #454957;
+  border-radius: 8px;
+  overflow-wrap: anywhere;
+}
