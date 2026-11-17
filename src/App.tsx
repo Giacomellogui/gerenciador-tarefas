@@ -269,14 +269,20 @@ function App() {
   // Somente o JSX retornado participa da interface deste componente.
   return (
     <main>
-      <h1>Minhas tarefas</h1>
-      <p>Organize seu dia, uma tarefa por vez.</p>
+      <header className="cabecalho">
+        <span className="marca" aria-hidden="true">✓</span>
+        <div><span className="sobretitulo">SEU ESPAÇO PARA ORGANIZAR</span>
+          <h1>Minhas tarefas<span>.</span></h1>
+          <p>Menos distração. Uma tarefa por vez.</p>
+        </div>
+      </header>
       <ResumoTarefas
         pendentes={totalPendentes}
         concluidas={totalConcluidas}
         total={tarefas.length}
       />
 
+      <div className="acoes-gerais">
       {/* Só permite limpar quando existe alguma tarefa concluída. */}
       <button
         type="button"
@@ -286,6 +292,9 @@ function App() {
       >
         Limpar concluídas
       </button>
+      {/* Backup recolhível mantém as ações secundárias disponíveis sem ocupar a tela. */}
+      <details className="backup"><summary>Backup das tarefas</summary>
+      <div className="backup-conteudo">
       {/* Baixa uma cópia de todas as tarefas, independentemente do filtro. */}
       <button type="button" onClick={exportarTarefas}>
         Exportar tarefas
@@ -304,11 +313,14 @@ function App() {
 
       {/* role="status" permite anunciar mudanças a quem usa leitor de tela. */}
       <p role="status">{mensagemImportacao}</p>
+      </div></details>
+      </div>
 
       {/* onSubmit aceita tanto o clique no botão quanto Enter no campo. */}
       {/* htmlFor liga o rótulo ao input de mesmo id. */}
 
-      <form onSubmit={adicionarTarefa}>
+      <form className="nova-tarefa" onSubmit={adicionarTarefa}>
+        <h2 className="titulo-formulario">+ Uma nova tarefa</h2>
         <label htmlFor="nova-tarefa">Nova tarefa</label>
 
         {/* Campo controlado: value lê o estado e onChange atualiza esse estado. */}

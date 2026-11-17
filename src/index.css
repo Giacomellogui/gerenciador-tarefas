@@ -9,9 +9,11 @@ body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
-  background: #15161c;
+  background: #101116;
   color: #f3f4f6;
-  font-family: Arial, sans-serif;
+  font-family: 'Segoe UI', Arial, sans-serif;
+  line-height: 1.5;
+  color-scheme: dark;
 }
 
 /* Faz campos e botões herdarem a fonte, em vez da fonte padrão do navegador. */

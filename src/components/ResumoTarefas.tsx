@@ -16,10 +16,17 @@ export default function ResumoTarefas({
         ? 0
         : Math.round((concluidas / total) * 100);
     return (
-        <section aria-label="Resumo das tarefas">
+        <section className="resumo" aria-label="Resumo das tarefas">
+            {/* Cartões destacam os totais sem misturar com as ações da lista. */}
+            <div className="indicadores">
+              <div className="indicador"><span>Total de tarefas</span><strong>{total}</strong></div>
+              <div className="indicador pendentes"><span>Pendentes</span><strong>{pendentes}</strong></div>
+              <div className="indicador finalizadas"><span>Concluídas</span><strong>{concluidas}</strong></div>
+            </div>
+            <div className="progresso">
             {/* htmlFor conecta o rótulo à barra pelo id. */}
             <label htmlFor="progresso-tarefas">
-                Progresso: {percentual}%
+                Seu progresso <strong>{percentual}%</strong>
             </label>
 
             {/* A barra usa as contagens reais; total || 1 garante máximo positivo. */}
@@ -28,9 +35,7 @@ export default function ResumoTarefas({
                 value={concluidas}
                 max={total || 1}
             />
-            <p>Total de tarefas: {total}</p>
-            <p>Tarefas pendentes: {pendentes}</p>
-            <p>Tarefas concluídas: {concluidas}</p>
+            </div>
         </section>
     );
 }
