@@ -1,16 +1,21 @@
 <!doctype html>
+<!-- Idioma principal, usado também por leitores de tela. -->
 <html lang="pt-BR">
   <head>
+    <!-- UTF-8 permite acentos; os links abaixo definem os ícones do aplicativo. -->
     <meta charset="UTF-8" />
     <link rel="icon" type="image/png" href="/icon-192.png" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <meta name="theme-color" content="#15161c" />
     <meta name="description" content="Organize seu dia com tarefas, filtros e acesso offline." />
+    <!-- Faz o layout usar a largura real do dispositivo, essencial no celular. -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Minhas tarefas</title>
   </head>
   <body>
+    <!-- main.tsx monta os componentes React dentro deste elemento. -->
     <div id="root"></div>
+    <!-- Entrada do código: o Vite processa TypeScript e JSX durante o build. -->
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

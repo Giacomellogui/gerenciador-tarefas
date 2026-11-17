@@ -1,7 +1,10 @@
+/* Inclui padding e bordas na largura/altura declaradas dos elementos. */
 * {
   box-sizing: border-box;
 }
 
+/* Base da página: remove margem padrão e define fundo, texto e fonte.
+   100vh corresponde à altura da janela; 320px é a largura mínima adotada. */
 body {
   margin: 0;
   min-width: 320px;
@@ -11,6 +14,7 @@ body {
   font-family: Arial, sans-serif;
 }
 
+/* Faz campos e botões herdarem a fonte, em vez da fonte padrão do navegador. */
 button,
 input {
   font: inherit;

@@ -1,13 +1,16 @@
+/* Elemento onde o React monta o app: ocupa toda a largura disponível. */
 #root {
   width: 100%;
 }
 
+/* Centraliza o conteúdo e limita a largura a 600px, com espaço nas laterais. */
 main {
   width: min(100%, 600px);
   margin: 0 auto;
   padding: 48px 20px;
 }
 
+/* Título e texto de apoio. */
 h1 {
   margin: 0 0 12px;
   font-size: 36px;
@@ -17,6 +20,7 @@ p {
   color: #a6adbb;
 }
 
+/* Flex organiza campos e botões; wrap permite quebrar linhas em telas pequenas. */
 form {
   display: flex;
   flex-wrap: wrap;
@@ -24,10 +28,12 @@ form {
   margin-top: 28px;
 }
 
+/* O rótulo ocupa uma linha inteira no formulário. */
 label {
   width: 100%;
 }
 
+/* flex: 1 preenche o espaço livre; min-width: 0 permite encolher no flex. */
 input {
   flex: 1;
   min-width: 0;
@@ -38,6 +44,7 @@ input {
   color: #fff;
 }
 
+/* Aparência compartilhada pelos botões. */
 button {
   padding: 12px 18px;
   border: 0;
@@ -47,11 +54,13 @@ button {
   cursor: pointer;
 }
 
+/* Indica visualmente ações indisponíveis, como enviar texto vazio. */
 button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
 
+/* Remove as bolinhas e distribui as tarefas em uma grade com espaçamento. */
 ul {
   display: grid;
   gap: 12px;
@@ -59,6 +68,7 @@ ul {
   list-style: none;
 }
 
+/* Cartão da tarefa; textos longos podem quebrar para não sair do cartão. */
 li {
   padding: 16px;
   border-radius: 8px;
@@ -73,6 +83,7 @@ li {
   gap: 12px;
 }
 
+/* O formulário de edição ocupa o cartão e não usa a margem do formulário novo. */
 .edicao {
   width: 100%;
   margin-top: 0;
@@ -86,6 +97,7 @@ li {
   background: #454957;
 }
 
+/* Mantém checkbox e texto juntos, deixando espaço para os botões. */
 .tarefa {
   display: flex;
   align-items: center;
@@ -95,6 +107,7 @@ li {
   cursor: pointer;
 }
 
+/* Sobrescreve o estilo do campo de texto para dimensionar o checkbox. */
 .tarefa input {
   flex: none;
   width: 18px;
@@ -102,16 +115,19 @@ li {
   accent-color: #8b5cf6;
 }
 
+/* Aplicada pelo JSX quando a tarefa está concluída. */
 .concluida {
   text-decoration: line-through;
   color: #a6adbb;
 }
 
+/* Destaca a exclusão e impede o botão de encolher no layout flex. */
 .excluir {
   flex-shrink: 0;
   background: #7f1d1d;
 }
 
+/* Organiza os filtros, quebrando a linha quando necessário. */
 .filtros {
   display: flex;
   flex-wrap: wrap;
@@ -124,6 +140,7 @@ li {
   border: 1px solid #454957;
 }
 
+/* O atributo atualizado pelo React também determina o destaque visual. */
 .filtros button[aria-pressed='true'] {
   background: #8b5cf6;
   border-color: #8b5cf6;
