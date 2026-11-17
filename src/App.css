@@ -1,88 +1,198 @@
-﻿/* Cores compartilhadas: altere as variáveis para experimentar outro tema. */
-:root { --painel: #191b24; --borda: #2b2e3c; --muted: #a6adbf; --roxo: #a18aff; }
+﻿/* Uma paleta por tema evita acumular sobrescritas em cada componente.
+   Superfícies próximas entre si deixam a cor de destaque reservada às ações. */
+:root {
+  --fundo: #f6f7f9;
+  --painel: #ffffff;
+  --coluna: #edeff3;
+  --texto: #20242d;
+  --muted: #6b7280;
+  --borda: #dfe3ea;
+  --suave: #f1f3f6;
+  --hover: #dfe5ec;
+  --acento: #3865d9;
+  --acento-hover: #2a50b5;
+  --acento-texto: #ffffff;
+  --acento-suave: #dceaff;
+  --quadro-texto: #20242d;
+  --quadro-muted: #6b7280;
+  --quadro-controle: #ffffff;
+  --quadro-hover: #e8ebf0;
+  --etiqueta-baixa: #d4f1de;
+  --etiqueta-media: #ffecb2;
+  --etiqueta-alta: #ffd9d4;
+  --perigo: #a14c43;
+  --baixa: #536c59;
+  --media: #886825;
+  --alta: #a34c40;
+  color-scheme: light;
+}
+html[data-tema='escuro'] {
+  --fundo: #141519;
+  --painel: #23252b;
+  --coluna: #1b1d22;
+  --texto: #e7e9ee;
+  --muted: #a1a7b3;
+  --borda: #363941;
+  --suave: #2a2d34;
+  --hover: #333741;
+  --acento: #92afff;
+  --acento-hover: #b1c5ff;
+  --acento-texto: #172548;
+  --acento-suave: #2b3755;
+  --quadro-texto: #e7e9ee;
+  --quadro-muted: #a1a7b3;
+  --quadro-controle: #23252b;
+  --quadro-hover: #333741;
+  --etiqueta-baixa: #254b37;
+  --etiqueta-media: #55451f;
+  --etiqueta-alta: #5c3435;
+  --perigo: #e7a399;
+  --baixa: #b0c5ad;
+  --media: #d5bd86;
+  --alta: #e5a092;
+  color-scheme: dark;
+}
+html[data-tema='escuro'] body { color-scheme: dark; }
 #root { width: 100%; }
-/* Limita a largura no PC e mantém espaço nas bordas do celular. */
-main { width: min(100%, 920px); margin: 0 auto; padding: 56px 28px 80px; }
-.cabecalho { display: flex; align-items: center; gap: 20px; margin-bottom: 32px; }
-.marca { display: grid; place-items: center; width: 56px; height: 56px; flex-shrink: 0; border-radius: 18px; background: #b6a3ff; color: #20183c; font-size: 32px; font-weight: 700; box-shadow: 0 8px 32px #9174f524; }
-.sobretitulo { font-size: 10px; letter-spacing: 2px; font-weight: 700; color: var(--muted); }
-h1 { margin: 4px 0; font-size: clamp(28px, 5vw, 42px); letter-spacing: -1.5px; line-height: 1.2; }
-h1 span { color: var(--roxo); }
-h2 { margin: 0; font-size: 17px; }
+.workspace { width: min(100%, 1440px); min-height: 100vh; margin: 0 auto; padding: 36px 40px 64px; }
+h1, h2, p { margin: 0; }
 p { color: var(--muted); }
-.cabecalho p { margin: 8px 0 0; font-size: 14px; }
-/* Grid divide o resumo em três cartões de mesma largura. */
-.indicadores { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
-.indicador { display: flex; flex-direction: column; padding: 20px 24px; border: 1px solid var(--borda); border-radius: 16px; background: var(--painel); }
-.indicador span { color: #c0c5d3; font-size: 13px; }
-.indicador strong { font-size: 36px; line-height: 1.5; letter-spacing: -1px; }
-.pendentes strong { color: #dfbd7c; }
-.finalizadas strong { color: #8bd5b4; }
-.progresso { padding: 20px 0 8px; }
-.progresso label { display: flex; justify-content: space-between; color: var(--muted); font-size: 12px; }
-.progresso strong { color: var(--roxo); }
-progress { display: block; width: 100%; height: 7px; margin-top: 10px; border: 0; border-radius: 20px; overflow: hidden; accent-color: var(--roxo); }
-progress::-webkit-progress-bar { background: #292b38; border-radius: 20px; }
-progress::-webkit-progress-value { background: #a18aff; border-radius: 20px; }
-progress::-moz-progress-bar { background: #a18aff; border-radius: 20px; }
-/* Foco visível permite reconhecer o controle selecionado usando o teclado. */
+h2 { font-size: 14px; font-weight: 600; }
+/* Cabeçalho aberto, com destaque no título e na ação principal. */
+.cabecalho { display: flex; align-items: center; justify-content: space-between; gap: 28px; padding: 0 0 28px; color: var(--quadro-texto); }
+.caminho-quadro { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; font-size: 11px; color: var(--quadro-muted); }
+.caminho-quadro > span:first-child { font-weight: 600; color: var(--quadro-texto); }
+h1 { font-size: 32px; line-height: 1.25; letter-spacing: -1px; font-weight: 650; }
+.cabecalho p { font-size: 12px; margin-top: 6px; color: var(--quadro-muted); }
+.acoes-cabecalho { display: flex; align-items: center; gap: 18px; flex-shrink: 0; }
+/* Os números complementam o quadro, em vez de competir com os cartões. */
+.resumo { display: flex; align-items: center; gap: 32px; padding: 18px 22px; background: var(--painel); border: 1px solid var(--borda); border-radius: 10px; color: var(--quadro-texto); }
+.indicadores { display: flex; align-items: center; gap: 28px; }
+.indicador { display: flex; align-items: baseline; gap: 9px; }
+.indicador span { color: var(--quadro-muted); font-size: 12px; }
+.indicador strong { font-weight: 600; font-size: 16px; font-variant-numeric: tabular-nums; }
+.progresso { display: flex; align-items: center; gap: 12px; width: 220px; margin-left: auto; }
+.progresso label { display: flex; align-items: center; gap: 8px; white-space: nowrap; font-size: 11px; color: var(--quadro-muted); }
+.progresso strong { color: var(--texto); font-weight: 500; }
+progress { flex: 1; width: 80px; height: 4px; border: 0; border-radius: 2px; overflow: hidden; accent-color: var(--acento); }
+progress::-webkit-progress-bar { background: var(--borda); }
+progress::-webkit-progress-value { background: var(--acento); }
+progress::-moz-progress-bar { background: var(--acento); }
+/* Controles simples: uma ação principal, alternativas neutras e foco pelo teclado. */
 button, summary { cursor: pointer; }
-button { min-height: 44px; padding: 10px 18px; border: 1px solid transparent; border-radius: 10px; background: #b6a3ff; color: #211936; font: inherit; font-size: 13px; font-weight: 600; transition: background .15s; }
-button:hover:not(:disabled) { background: #c8baff; }
-button:disabled { opacity: .45; cursor: not-allowed; }
-:is(button, input, select, summary):focus-visible { outline: 2px solid #c2b3ff; outline-offset: 4px; }
-.acoes-gerais { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; gap: 12px; margin: 16px 0 24px; }
-.excluir { color: #f4a5b2; background: #39212b; }
-.excluir:hover:not(:disabled) { background: #502b39; }
-.acoes-gerais > .excluir { background: transparent; border-color: var(--borda); }
-.cancelar { background: #292c3b; color: #e0e3ec; }
+button { min-height: 40px; padding: 8px 14px; border: 1px solid transparent; border-radius: 5px; font: inherit; font-size: 12px; font-weight: 500; background: var(--acento); color: var(--acento-texto); transition: background .12s; }
+button:hover:not(:disabled) { background: var(--acento-hover); }
+button:disabled { opacity: .42; cursor: not-allowed; }
+:is(button, input, select, summary):focus-visible { outline: 2px solid var(--acento); outline-offset: 3px; }
+.criar-tarefa { display: inline-flex; align-items: center; justify-content: center; gap: 8px; white-space: nowrap; background: var(--acento); color: var(--acento-texto); border-radius: 8px; }
+.criar-tarefa:hover:not(:disabled) { background: var(--acento-hover); }
+.criar-tarefa > span { font-size: 19px; font-weight: 400; line-height: 1; }
+.seletor-tema { display: flex; align-items: center; gap: 2px; padding: 3px; background: var(--coluna); border: 1px solid var(--borda); border-radius: 8px; }
+.seletor-tema button { display: flex; align-items: center; gap: 6px; min-height: 32px; padding: 6px 9px; border-radius: 3px; font-size: 11px; color: var(--quadro-muted); background: transparent; }
+.seletor-tema button[aria-pressed='true'] { color: var(--texto); background: var(--painel); }
+.seletor-tema button:hover:not(:disabled) { background: var(--hover); color: var(--texto); }
+.seletor-tema svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+/* Ações secundárias ficam discretas; o backup continua acessível por details. */
+.acoes-gerais { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin: 12px 0 8px; }
+.acoes-gerais > .excluir { min-height: 36px; padding: 6px 10px; background: transparent; color: var(--muted); font-size: 11px; }
+.acoes-gerais > .excluir:hover:not(:disabled) { color: var(--perigo); background: var(--quadro-hover); }
 .backup { max-width: 100%; }
-.backup summary { padding: 11px 4px; color: var(--muted); font-size: 13px; }
-.backup-conteudo { padding: 18px; margin-top: 8px; background: var(--painel); border: 1px solid var(--borda); border-radius: 14px; }
+.backup summary { padding: 9px 10px; border-radius: 5px; font-size: 11px; color: var(--muted); }
+.backup-conteudo { padding: 18px; margin: 4px 0 12px; background: var(--painel); border: 1px solid var(--borda); border-radius: 5px; }
+.backup-conteudo p { font-size: 12px; margin-top: 12px; }
 .backup-conteudo p:empty { display: none; }
-/* Formulário com texto, prioridade e ação alinhados no PC. */
-.nova-tarefa { display: grid; grid-template-columns: minmax(0, 1fr) 160px auto; gap: 12px; padding: 24px; background: var(--painel); border: 1px solid var(--borda); border-radius: 18px; }
-.titulo-formulario { grid-column: 1 / -1; margin-bottom: 8px; color: #d8ceff; }
-.nova-tarefa > label { grid-column: 1 / -1; }
-.nova-tarefa > input, .nova-tarefa > button { align-self: end; }
-label { font-size: 12px; color: #c1c6d4; }
-input, select { width: 100%; min-width: 0; min-height: 44px; padding: 11px 13px; border: 1px solid #363a4b; border-radius: 10px; background: #11131b; color: #f3f4f6; font: inherit; font-size: 14px; }
-input::placeholder { color: #858da1; }
-.campo-prioridade, .busca { display: grid; gap: 8px; }
-.busca { margin-top: 24px; }
-.filtros { display: flex; gap: 6px; padding: 5px; margin-top: 16px; width: fit-content; max-width: 100%; border: 1px solid var(--borda); border-radius: 12px; background: #151720; }
-.filtros button { background: transparent; color: var(--muted); min-height: 38px; }
-.filtros button[aria-pressed='true'] { background: #363047; color: #e0d7ff; }
-/* Cartões quebram linha para acomodar textos longos e telas pequenas. */
-ul { display: grid; gap: 10px; padding: 0; margin: 20px 0 0; list-style: none; }
-li { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 18px; border: 1px solid var(--borda); border-radius: 14px; background: var(--painel); overflow-wrap: anywhere; }
-li > button { min-height: 44px; padding: 8px 12px; }
-li > button:not(.excluir) { background: #2b293e; color: #c9bbff; }
-.tarefa { display: flex; align-items: center; gap: 12px; flex: 1; min-width: 120px; font-size: 14px; color: #e5e7ef; cursor: pointer; }
-.tarefa input { flex: none; width: 19px; height: 19px; min-height: 0; margin: 0; accent-color: #a18aff; }
-.concluida { color: #9299aa; text-decoration: line-through; }
-.prioridade { padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 600; }
-.prioridade-baixa { background: #19382f; color: #a7e5c8; }
-.prioridade-media { background: #3d321e; color: #edd297; }
-.prioridade-alta { background: #412632; color: #f5b5c7; }
-.edicao { display: grid; width: 100%; grid-template-columns: 1fr 1fr; gap: 12px; }
+label { font-size: 12px; color: var(--muted); }
+input, select { min-width: 0; width: 100%; min-height: 40px; padding: 9px 11px; border: 1px solid var(--borda); border-radius: 5px; background: var(--painel); color: var(--texto); font: inherit; font-size: 13px; }
+input::placeholder { color: var(--muted); opacity: .85; }
+.campo-prioridade, .busca { display: grid; gap: 7px; }
+.backup-conteudo .busca { margin-top: 16px; }
+.nova-tarefa { display: grid; grid-template-columns: minmax(0, 1fr) 160px auto auto; align-items: end; gap: 12px; padding: 20px; margin: 18px 0; background: var(--painel); border: 1px solid var(--borda); border-left: 3px solid var(--acento); border-radius: 5px; }
+.titulo-formulario, .nova-tarefa > label { grid-column: 1 / -1; }
+.cancelar { background: var(--suave); color: var(--texto); border-color: var(--borda); }
+.cancelar:hover:not(:disabled) { background: var(--hover); }
+/* Busca e filtros compartilham uma barra; rótulo acessível sem repetição visual. */
+.barra-quadro { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin: 12px 0 20px; }
+/* As mensagens e o foco usam a paleta do tema para manter o contraste. */
+.mensagem-quadro { color: var(--quadro-texto); font-size: 13px; }
+:is(.acoes-cabecalho, .acoes-gerais, .barra-quadro) :is(button, summary, input):focus-visible { outline-color: var(--acento); }
+.pesquisa-quadro { width: 270px; }
+.pesquisa-quadro > label, .somente-leitor { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
+.pesquisa-quadro input { min-height: 40px; background: var(--painel); border-color: var(--borda); border-radius: 8px; font-size: 12px; }
+.filtros { display: flex; gap: 3px; padding: 3px; border-radius: 8px; background: var(--coluna); }
+.filtros button { min-height: 32px; padding: 6px 12px; background: transparent; color: var(--quadro-muted); border-radius: 4px; }
+.filtros button[aria-pressed='true'] { background: var(--painel); color: var(--texto); }
+.filtros button:hover:not(:disabled) { background: var(--hover); color: var(--texto); }
+.filtros button[aria-pressed='true']:hover:not(:disabled) { background: var(--painel); color: var(--acento); }
+/* As colunas têm a mesma superfície. Só o pequeno marcador distingue cada etapa. */
+.quadro { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: start; gap: 16px; margin-top: 16px; }
+.coluna { min-width: 0; padding: 16px 12px 10px; background: var(--coluna); border: 1px solid var(--borda); border-radius: 12px; }
+.coluna-cabecalho { display: flex; align-items: center; gap: 10px; padding: 3px 4px 0; }
+.coluna-cabecalho h2 { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; }
+.ponto-status { width: 7px; height: 7px; border: 1.5px solid var(--muted); border-radius: 50%; }
+.coluna-andamento .ponto-status { border-color: var(--media); background: var(--media); }
+.coluna-concluida .ponto-status { border-color: var(--baixa); background: var(--baixa); }
+.contador-coluna { display: grid; place-items: center; min-width: 24px; height: 22px; margin-left: auto; border-radius: 4px; background: var(--hover); color: var(--muted); font-size: 11px; font-variant-numeric: tabular-nums; }
+.descricao-coluna { margin: 5px 4px 18px; font-size: 11px; }
+ul { display: grid; gap: 10px; padding: 0; margin: 0; list-style: none; }
+/* A sombra leve separa os cartões brancos das listas cinza. */
+li { min-width: 0; padding: 16px 14px 8px; border: 1px solid var(--borda); border-radius: 8px; background: var(--painel); box-shadow: 0 1px 2px #10182806; overflow-wrap: anywhere; }
+li:hover { border-color: var(--muted); }
+li[draggable='true'] { cursor: grab; }
+li[draggable='true']:active { cursor: grabbing; }
+.tarefa { display: flex; align-items: flex-start; gap: 10px; width: 100%; min-width: 0; color: var(--texto); font-size: 14px; font-weight: 500; line-height: 1.6; cursor: pointer; }
+.tarefa input { flex: none; width: 15px; height: 15px; min-height: 0; margin: 4px 0 0; padding: 0; accent-color: var(--acento); }
+.concluida { color: var(--muted); text-decoration: line-through; }
+.metadados-cartao { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; margin: 18px 0 8px; }
+.prioridade { display: inline-flex; align-items: center; gap: 6px; padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; color: var(--muted); }
+.prioridade > span { width: 5px; height: 5px; border-radius: 1px; background: currentColor; }
+.prioridade-baixa { color: var(--baixa); background: var(--etiqueta-baixa); }
+.prioridade-media { color: var(--media); background: var(--etiqueta-media); }
+.prioridade-alta { color: var(--alta); background: var(--etiqueta-alta); }
+.mover-tarefa { max-width: 150px; }
+.mover-tarefa select { min-height: 32px; padding: 5px 8px; background: var(--suave); border-color: transparent; font-size: 11px; cursor: pointer; }
+.acoes-cartao { display: flex; justify-content: flex-end; gap: 2px; border-top: 1px solid var(--borda); padding-top: 4px; }
+.acoes-cartao button { min-height: 36px; padding: 6px 9px; border: 0; font-size: 11px; font-weight: 400; background: transparent; color: var(--muted); }
+.acoes-cartao button:hover:not(:disabled) { background: var(--suave); color: var(--texto); }
+.acoes-cartao .excluir:hover:not(:disabled) { color: var(--perigo); }
+.adicionar-cartao { width: 100%; min-height: 40px; margin-top: 9px; padding: 9px 5px; text-align: left; background: transparent; color: var(--muted); font-size: 12px; font-weight: 400; }
+.adicionar-cartao:hover:not(:disabled) { background: var(--hover); color: var(--texto); }
+.coluna-vazia { margin: 0; padding: 26px 8px; text-align: center; font-size: 11px; color: var(--muted); }
+.edicao { display: grid; grid-template-columns: 1fr 1fr; width: 100%; gap: 12px; padding-bottom: 8px; }
 .edicao > label, .edicao > input, .edicao > .campo-prioridade { grid-column: 1 / -1; }
-.aviso-exclusao { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px; padding: 14px 18px; margin-top: 20px; border: 1px solid #5b4e83; border-radius: 12px; background: #242033; font-size: 13px; overflow-wrap: anywhere; }
-/* Media query adapta o formulário e os cartões ao celular. */
-@media (max-width: 640px) {
-  main { padding: 30px 16px 48px; }
-  .cabecalho { gap: 12px; }
-  .marca { width: 44px; height: 44px; border-radius: 14px; font-size: 26px; }
-  .sobretitulo { font-size: 8px; letter-spacing: 1.4px; }
-  .indicadores { gap: 8px; }
-  .indicador { padding: 14px 10px; }
+.aviso-exclusao { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin: 16px 0; padding: 10px 14px; border: 1px solid var(--borda); border-left: 3px solid var(--acento); border-radius: 4px; background: var(--painel); color: var(--texto); font-size: 12px; overflow-wrap: anywhere; }
+/* Tablet: mantém o quadro e simplifica o cabeçalho antes de empilhar no celular. */
+@media (max-width: 1000px) {
+  .workspace { padding: 24px 22px 48px; }
+  .cabecalho { flex-wrap: wrap; gap: 20px; }
+  .cabecalho > .acoes-cabecalho { margin-left: auto; }
+  .quadro { gap: 12px; }
+  .coluna { padding: 12px 9px; }
+  .indicadores { gap: 18px; }
+  .nova-tarefa { grid-template-columns: 1fr 150px; }
+}
+/* No toque os controles têm pelo menos 44px; nenhuma ação depende de hover. */
+@media (max-width: 680px) {
+  .workspace { padding: 20px 16px 40px; }
+  .cabecalho { gap: 20px; padding: 0 0 22px; }
+  .caminho-quadro { margin-bottom: 14px; }
+  h1 { font-size: 28px; }
+  .cabecalho > .acoes-cabecalho { width: 100%; justify-content: space-between; margin: 0; gap: 12px; }
+  .criar-tarefa { min-height: 44px; }
+  .seletor-tema button { min-height: 38px; }
+  .resumo { align-items: stretch; flex-direction: column; gap: 14px; padding: 16px; }
+  .indicadores { justify-content: space-between; gap: 12px; }
+  .indicador { flex-direction: column; gap: 2px; }
   .indicador span { font-size: 11px; }
-  .indicador strong { font-size: 30px; }
-  .nova-tarefa { grid-template-columns: 1fr; padding: 18px; }
-  .nova-tarefa > button { width: 100%; }
-  .tarefa { flex-basis: 100%; }
-  .prioridade { margin-right: auto; }
-  .filtros { width: 100%; }
-  .filtros button { flex: 1; padding: 8px; }
+  .indicador strong { font-size: 18px; }
+  .progresso { width: 100%; margin: 0; }
+  .barra-quadro { gap: 10px; }
+  .pesquisa-quadro, .filtros { width: 100%; }
+  .pesquisa-quadro input { min-height: 44px; }
+  .filtros button { min-height: 44px; flex: 1; }
+  .quadro { grid-template-columns: 1fr; gap: 24px; }
+  .coluna { min-height: 180px; padding: 14px 12px; }
+  .nova-tarefa { grid-template-columns: 1fr; padding: 16px; }
   .backup[open] { width: 100%; }
+  .mover-tarefa select { min-height: 44px; }
+  .acoes-cartao button, .adicionar-cartao { min-height: 44px; }
 }

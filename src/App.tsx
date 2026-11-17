@@ -4,10 +4,12 @@ import { ehTarefa } from './utils/validarTarefa';
 import type { ChangeEvent } from 'react';
 import { useState } from 'react';
 import { useTarefas } from './hooks/useTarefas';
+import { useTema } from './hooks/useTema';
 import SeletorPrioridade from './components/SeletorPrioridade';
 import FormularioEdicao from './components/FormularioEdicao';
 // O formato da tarefa é compartilhado com ItemTarefa, sem duplicar a definição.
-import type { Prioridade, Tarefa } from './types/Tarefa';
+import { obterStatus } from './types/Tarefa';
+import type { Prioridade, StatusTarefa, Tarefa } from './types/Tarefa';
 import ItemTarefa from './components/ItemTarefa';
 import ResumoTarefas from './components/ResumoTarefas';
 // Importa somente o tipo do evento, usado pelo TypeScript para verificar o código.
@@ -15,6 +17,16 @@ import type { FormEvent } from 'react';
 import './App.css';
 
 function App() {
+  // O hook aplica as cores e mantém a preferência após fechar o aplicativo.
+  const { tema, setTema } = useTema();
+  const [mostrarFormulario, setMostrarFormulario] = useState(false);
+  const [statusNovaTarefa, setStatusNovaTarefa] = useState<StatusTarefa>('afazer');
+  // As colunas são dados: o mesmo JSX será reutilizado para cada etapa.
+  const colunas: { id: StatusTarefa; nome: string; descricao: string }[] = [
+    { id: 'afazer', nome: 'A fazer', descricao: 'Ainda não iniciadas' },
+    { id: 'andamento', nome: 'Em andamento', descricao: 'Trabalhando agora' },
+    { id: 'concluida', nome: 'Concluídas', descricao: 'Trabalho finalizado' },
+  ];
   // Mostra o resultado da importação na interface.
   const [mensagemImportacao, setMensagemImportacao] = useState('');
   // Guarda a última tarefa excluída para permitir recuperá-la.
@@ -51,7 +63,8 @@ function App() {
       // Identificador próprio permite distinguir tarefas com textos iguais.
       id: crypto.randomUUID(),
       texto,
-      concluida: false,
+      concluida: statusNovaTarefa === 'concluida',
+      status: statusNovaTarefa,
       // Guarda na tarefa a prioridade escolhida no formulário.
       prioridade,
     };
@@ -60,6 +73,7 @@ function App() {
     setTarefas((atuais) => [...atuais, tarefa]);
     // Como o input usa esse estado em value, isso também limpa o campo.
     setNovaTarefa('');
+    setMostrarFormulario(false);
   }
 
   function alternarTarefa(id: string) {
@@ -68,10 +82,23 @@ function App() {
     setTarefas((atuais) =>
       atuais.map((tarefa) =>
         tarefa.id === id
-          ? { ...tarefa, concluida: !tarefa.concluida }
+          ? { ...tarefa, concluida: !tarefa.concluida,
+              status: tarefa.concluida ? 'afazer' : 'concluida' }
           : tarefa
       )
     );
+  }
+
+  // Atualiza etapa e conclusão juntas para manter filtros, progresso e backups coerentes.
+  function moverTarefa(id: string, status: StatusTarefa) {
+    setTarefas((atuais) => atuais.map((tarefa) =>
+      tarefa.id === id ? { ...tarefa, status, concluida: status === 'concluida' } : tarefa
+    ));
+  }
+
+  function abrirCriacao(status: StatusTarefa = 'afazer') {
+    setStatusNovaTarefa(status);
+    setMostrarFormulario(true);
   }
 
   function excluirTarefa(id: string) {
@@ -268,12 +295,28 @@ function App() {
 
   // Somente o JSX retornado participa da interface deste componente.
   return (
-    <main>
+    <main className="workspace">
       <header className="cabecalho">
-        <span className="marca" aria-hidden="true">✓</span>
-        <div><span className="sobretitulo">SEU ESPAÇO PARA ORGANIZAR</span>
-          <h1>Minhas tarefas<span>.</span></h1>
-          <p>Menos distração. Uma tarefa por vez.</p>
+        <div className="titulo-quadro">
+          <div className="caminho-quadro"><span>Minhas tarefas</span><span aria-hidden="true">/</span><span>Quadro pessoal</span></div>
+          <h1>Meu planejamento</h1>
+          <p>Organize suas tarefas neste quadro.</p>
+        </div>
+        <div className="acoes-cabecalho">
+          {/* Botões segmentados mostram as duas opções e anunciam a seleção. */}
+          <div className="seletor-tema" role="group" aria-label="Tema de cor">
+            <button type="button" aria-pressed={tema === 'claro'} onClick={() => setTema('claro')}>
+              <svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"/></svg>
+              <span>Claro</span>
+            </button>
+            <button type="button" aria-pressed={tema === 'escuro'} onClick={() => setTema('escuro')}>
+              <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M20.5 13A8.5 8.5 0 0 1 11 3.5 8.5 8.5 0 1 0 20.5 13Z"/></svg>
+              <span>Escuro</span>
+            </button>
+          </div>
+          <button className="criar-tarefa" type="button" onClick={() => abrirCriacao()}>
+            <span aria-hidden="true">+</span> Nova tarefa
+          </button>
         </div>
       </header>
       <ResumoTarefas
@@ -319,13 +362,15 @@ function App() {
       {/* onSubmit aceita tanto o clique no botão quanto Enter no campo. */}
       {/* htmlFor liga o rótulo ao input de mesmo id. */}
 
-      <form className="nova-tarefa" onSubmit={adicionarTarefa}>
-        <h2 className="titulo-formulario">+ Uma nova tarefa</h2>
+      {/* O formulário só aparece quando solicitado, mantendo o quadro como foco. */}
+      {mostrarFormulario && <form className="nova-tarefa" onSubmit={adicionarTarefa}>
+        <h2 className="titulo-formulario">Nova tarefa · {colunas.find((coluna) => coluna.id === statusNovaTarefa)?.nome}</h2>
         <label htmlFor="nova-tarefa">Nova tarefa</label>
 
         {/* Campo controlado: value lê o estado e onChange atualiza esse estado. */}
         <input
           id="nova-tarefa"
+          autoFocus
           type="text"
           placeholder="O que você precisa fazer?"
           value={novaTarefa}
@@ -343,15 +388,17 @@ function App() {
         <button type="submit" disabled={!novaTarefa.trim()}>
           Adicionar
         </button>
-      </form>
+        <button type="button" className="cancelar" onClick={() => setMostrarFormulario(false)}>Cancelar</button>
+      </form>}
 
+      <div className="barra-quadro">
       {/* A digitação atualiza busca e recalcula a lista sem alterar as tarefas salvas. */}
-      <div className="busca">
+      <div className="busca pesquisa-quadro">
         <label htmlFor="buscar-tarefas">Buscar tarefas</label>
         <input
           id="buscar-tarefas"
           type="search"
-          placeholder="Digite parte do texto"
+          placeholder="Buscar no quadro…"
           value={busca}
           onChange={(evento) => setBusca(evento.target.value)}
         />
@@ -370,9 +417,10 @@ function App() {
         </button>
       </div>
 
+      </div>
       {/* && mostra a mensagem somente quando a condição à esquerda é verdadeira. */}
       {tarefasFiltradas.length === 0 && (
-        <p>{termoBusca ? 'Nenhuma tarefa encontrada para esta busca e filtro.' : 'Nenhuma tarefa neste filtro.'}</p>
+        <p className="mensagem-quadro">{termoBusca ? 'Nenhuma tarefa encontrada para esta busca e filtro.' : 'Nenhuma tarefa neste filtro.'}</p>
       )}
 
       {/* Mostra o aviso somente quando existe uma tarefa para recuperar. */}
@@ -385,10 +433,24 @@ function App() {
           </button>
         </div>
       )}
-      {/* map transforma os dados em elementos. key identifica cada item para o React. */}
-      <ul>
-        {tarefasFiltradas.map((tarefa) => (
-          <li key={tarefa.id}>
+      {/* Cada coluna agrupa a lista filtrada pela etapa. Arrastar é um atalho no PC. */}
+      <div className="quadro">
+      {colunas.map((coluna) => {
+        const itens = tarefasFiltradas.filter((tarefa) => obterStatus(tarefa) === coluna.id);
+        return <section key={coluna.id} className={`coluna coluna-${coluna.id}`}
+          aria-label={coluna.nome}
+          onDragOver={(evento) => evento.preventDefault()}
+          onDrop={(evento) => {
+            evento.preventDefault();
+            const id = evento.dataTransfer.getData('text/plain');
+            if (id) moverTarefa(id, coluna.id);
+          }}>
+          <header className="coluna-cabecalho"><h2><span className="ponto-status" />{coluna.nome}</h2><span className="contador-coluna">{itens.length}</span></header>
+          <p className="descricao-coluna">{coluna.descricao}</p>
+          <ul>
+        {itens.map((tarefa) => (
+          <li key={tarefa.id} draggable={idEmEdicao !== tarefa.id}
+            onDragStart={(evento) => evento.dataTransfer.setData('text/plain', tarefa.id)}>
             {/* O ternário escolhe entre o formulário de edição e a visualização. */}
             {idEmEdicao === tarefa.id ? (
               // O formulário recebe o rascunho e as ações; o estado fica no App.
@@ -408,11 +470,17 @@ function App() {
                 onAlternar={alternarTarefa}
                 onEditar={() => iniciarEdicao(tarefa)}
                 onExcluir={excluirTarefa}
+                onMover={moverTarefa}
               />
             )}
           </li>
         ))}
-      </ul>
+          </ul>
+          {itens.length === 0 && <p className="coluna-vazia">Nenhuma tarefa nesta etapa</p>}
+          <button className="adicionar-cartao" type="button" onClick={() => abrirCriacao(coluna.id)}>+ Adicionar tarefa</button>
+        </section>;
+      })}
+      </div>
     </main>
   );
 }

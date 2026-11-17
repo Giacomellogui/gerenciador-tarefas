@@ -22,8 +22,8 @@ export default defineConfig({
       scope: '/',
       // Abre como janela de aplicativo, sem a barra de navegação comum.
       display: 'standalone',
-      theme_color: '#15161c',
-      background_color: '#15161c',
+      theme_color: '#f6f7f9',
+      background_color: '#f6f7f9',
       // Ícones em tamanhos diferentes; maskable permite recortes do sistema.
       icons: [
         { src: '/icon-192.png', sizes: '192x192', type: 'image/png' },

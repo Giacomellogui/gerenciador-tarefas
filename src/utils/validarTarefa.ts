@@ -15,6 +15,9 @@ export function ehTarefa(valor: unknown): valor is Tarefa {
     typeof valor.texto === 'string' &&
     'concluida' in valor &&
     typeof valor.concluida === 'boolean' &&
+    // O status é opcional para manter compatibilidade com dados anteriores ao Kanban.
+    (!('status' in valor) || valor.status === 'afazer' ||
+      valor.status === 'andamento' || valor.status === 'concluida') &&
     (
       // Ausência é aceita para manter compatibilidade com tarefas antigas.
       !('prioridade' in valor) ||
