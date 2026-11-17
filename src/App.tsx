@@ -1,5 +1,5 @@
 // O formato da tarefa é compartilhado com ItemTarefa, sem duplicar a definição.
-import type { Tarefa } from './types/Tarefa';
+import type { Prioridade, Tarefa } from './types/Tarefa';
 import ItemTarefa from './components/ItemTarefa';
 import ResumoTarefas from './components/ResumoTarefas';
 
@@ -12,12 +12,18 @@ import './App.css';
 function App() {
   // Texto controlado pelo campo de criação. O setter atualiza o estado e a tela.
   const [novaTarefa, setNovaTarefa] = useState('');
+  // Prioridade escolhida para a próxima tarefa.
+  const [prioridade, setPrioridade] = useState<Prioridade>('media');
   // Texto digitado no campo de busca.
   const [busca, setBusca] = useState('');
   // null significa que nenhuma tarefa está sendo editada.
   const [idEmEdicao, setIdEmEdicao] = useState<string | null>(null);
   // Rascunho separado do texto salvo: cancelar não altera a tarefa original.
   const [textoEmEdicao, setTextoEmEdicao] = useState('');
+  // Rascunho do texto da tarefa em edição.
+  // Rascunho da prioridade: só será aplicado quando clicar em Salvar.
+  const [prioridadeEmEdicao, setPrioridadeEmEdicao] =
+    useState<Prioridade>('media');
   // A união de tipos aceita somente estes três nomes de filtro.
   const [filtro, setFiltro] = useState<'todas' | 'pendentes' | 'concluidas'>('todas');
   // Inicialização preguiçosa: lê o armazenamento ao inicializar o estado,
@@ -54,6 +60,8 @@ function App() {
       id: crypto.randomUUID(),
       texto,
       concluida: false,
+      // Guarda na tarefa a prioridade escolhida no formulário.
+      prioridade,
     };
 
     // Usa o estado mais recente e cria um novo array sem modificar o anterior.
@@ -87,6 +95,8 @@ function App() {
     // Seleciona a tarefa e preenche o rascunho com o texto atual.
     setIdEmEdicao(tarefa.id);
     setTextoEmEdicao(tarefa.texto);
+    // Preenche o rascunho com a prioridade atual da tarefa.
+    setPrioridadeEmEdicao(tarefa.prioridade ?? 'media');
   }
 
   function salvarEdicao(evento: FormEvent<HTMLFormElement>) {
@@ -94,12 +104,16 @@ function App() {
     const texto = textoEmEdicao.trim();
     if (!texto) return;
 
-    // O spread preserva id e concluida; texto substitui apenas o texto antigo.
+    // Atualiza o texto e a prioridade somente da tarefa em edição.
     setTarefas((atuais) =>
       atuais.map((tarefa) =>
-        tarefa.id === idEmEdicao ? { ...tarefa, texto } : tarefa
+        tarefa.id === idEmEdicao
+          ? { ...tarefa, texto, prioridade: prioridadeEmEdicao }
+          : tarefa
       )
     );
+
+    // Fecha o formulário de edição após salvar.
     setIdEmEdicao(null);
   }
 
@@ -146,6 +160,7 @@ function App() {
 
       {/* onSubmit aceita tanto o clique no botão quanto Enter no campo. */}
       {/* htmlFor liga o rótulo ao input de mesmo id. */}
+
       <form onSubmit={adicionarTarefa}>
         <label htmlFor="nova-tarefa">Nova tarefa</label>
 
@@ -157,6 +172,27 @@ function App() {
           value={novaTarefa}
           onChange={(evento) => setNovaTarefa(evento.target.value)}
         />
+
+        {/* Seletor controlado: a escolha atual fica no estado prioridade. */}
+        <div className="campo-prioridade">
+          <label htmlFor="prioridade">Prioridade</label>
+          <select
+            id="prioridade"
+            value={prioridade}
+            onChange={(evento) => {
+              const valor = evento.target.value;
+
+              // Valida o texto recebido do HTML antes de atualizar o estado tipado.
+              if (valor === 'baixa' || valor === 'media' || valor === 'alta') {
+                setPrioridade(valor);
+              }
+            }}
+          >
+            <option value="baixa">Baixa</option>
+            <option value="media">Média</option>
+            <option value="alta">Alta</option>
+          </select>
+        </div>
 
         {/* disabled impede enviar um campo vazio ou contendo apenas espaços. */}
         <button type="submit" disabled={!novaTarefa.trim()}>
@@ -212,6 +248,24 @@ function App() {
                     if (evento.key === 'Escape') setIdEmEdicao(null);
                   }}
                 />
+                {/* Permite mudar a prioridade sem alterar a tarefa até salvar. */}
+                <label htmlFor={`prioridade-${tarefa.id}`}>Prioridade</label>
+
+                <select
+                  id={`prioridade-${tarefa.id}`}
+                  value={prioridadeEmEdicao}
+                  onChange={(evento) => {
+                    const valor = evento.target.value;
+
+                    if (valor === 'baixa' || valor === 'media' || valor === 'alta') {
+                      setPrioridadeEmEdicao(valor);
+                    }
+                  }}
+                >
+                  <option value="baixa">Baixa</option>
+                  <option value="media">Média</option>
+                  <option value="alta">Alta</option>
+                </select>
                 <button type="submit" disabled={!textoEmEdicao.trim()}>Salvar</button>
                 {/* type="button" impede que Cancelar envie o formulário. */}
                 <button type="button" className="cancelar" onClick={() => setIdEmEdicao(null)}>

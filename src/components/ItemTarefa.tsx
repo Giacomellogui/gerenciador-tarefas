@@ -15,6 +15,11 @@ export default function ItemTarefa({
   onEditar,
   onExcluir,
 }: ItemTarefaProps) {
+  // ?? usa média nas tarefas antigas, que ainda não possuem essa propriedade.
+  const prioridade = tarefa.prioridade ?? 'media';
+  // Separa os valores usados no código dos textos apresentados na tela.
+  const nomesPrioridade = { baixa: 'Baixa', media: 'Média', alta: 'Alta' };
+
   return (
     <>
       <label className="tarefa">
@@ -28,6 +33,11 @@ export default function ItemTarefa({
           {tarefa.texto}
         </span>
       </label>
+
+      {/* Texto e cor identificam a prioridade, sem depender apenas da cor. */}
+      <span className={`prioridade prioridade-${prioridade}`}>
+        Prioridade: {nomesPrioridade[prioridade]}
+      </span>
 
       {/* Recebe a função; ela só será executada quando houver clique. */}
       <button

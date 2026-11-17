@@ -161,3 +161,42 @@ progress {
   gap: 8px;
   margin-top: 24px;
 }
+
+/* Mantém o rótulo e o seletor de prioridade juntos em uma linha própria. */
+.campo-prioridade {
+  display: grid;
+  gap: 8px;
+  width: 100%;
+}
+
+/* Usa a mesma fonte e as mesmas cores dos outros campos do aplicativo. */
+select {
+  padding: 12px;
+  border: 1px solid #454957;
+  border-radius: 8px;
+  background: #22242e;
+  color: #fff;
+  font: inherit;
+}
+
+/* Rótulo compacto: a classe adicional escolhe as cores de cada prioridade. */
+.prioridade {
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+}
+
+.prioridade-baixa {
+  background: #143b32;
+  color: #a7f3d0;
+}
+
+.prioridade-media {
+  background: #453516;
+  color: #fde68a;
+}
+
+.prioridade-alta {
+  background: #4c202b;
+  color: #fecdd3;
+}
