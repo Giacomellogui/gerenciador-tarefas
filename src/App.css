@@ -1,0 +1,130 @@
+#root {
+  width: 100%;
+}
+
+main {
+  width: min(100%, 600px);
+  margin: 0 auto;
+  padding: 48px 20px;
+}
+
+h1 {
+  margin: 0 0 12px;
+  font-size: 36px;
+}
+
+p {
+  color: #a6adbb;
+}
+
+form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 28px;
+}
+
+label {
+  width: 100%;
+}
+
+input {
+  flex: 1;
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid #454957;
+  border-radius: 8px;
+  background: #22242e;
+  color: #fff;
+}
+
+button {
+  padding: 12px 18px;
+  border: 0;
+  border-radius: 8px;
+  background: #8b5cf6;
+  color: #fff;
+  cursor: pointer;
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+ul {
+  display: grid;
+  gap: 12px;
+  padding: 0;
+  list-style: none;
+}
+
+li {
+  padding: 16px;
+  border-radius: 8px;
+  background: #22242e;
+  overflow-wrap: anywhere;
+}
+
+li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.edicao {
+  width: 100%;
+  margin-top: 0;
+}
+
+.edicao input {
+  flex-basis: 100%;
+}
+
+.cancelar {
+  background: #454957;
+}
+
+.tarefa {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+  cursor: pointer;
+}
+
+.tarefa input {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  accent-color: #8b5cf6;
+}
+
+.concluida {
+  text-decoration: line-through;
+  color: #a6adbb;
+}
+
+.excluir {
+  flex-shrink: 0;
+  background: #7f1d1d;
+}
+
+.filtros {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 24px;
+}
+
+.filtros button {
+  background: #22242e;
+  border: 1px solid #454957;
+}
+
+.filtros button[aria-pressed='true'] {
+  background: #8b5cf6;
+  border-color: #8b5cf6;
+}
