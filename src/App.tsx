@@ -1,3 +1,5 @@
+import SeletorPrioridade from './components/SeletorPrioridade';
+import FormularioEdicao from './components/FormularioEdicao';
 // O formato da tarefa é compartilhado com ItemTarefa, sem duplicar a definição.
 import type { Prioridade, Tarefa } from './types/Tarefa';
 import ItemTarefa from './components/ItemTarefa';
@@ -23,7 +25,6 @@ function App() {
   const [idEmEdicao, setIdEmEdicao] = useState<string | null>(null);
   // Rascunho separado do texto salvo: cancelar não altera a tarefa original.
   const [textoEmEdicao, setTextoEmEdicao] = useState('');
-  // Rascunho do texto da tarefa em edição.
   // Rascunho da prioridade: só será aplicado quando clicar em Salvar.
   const [prioridadeEmEdicao, setPrioridadeEmEdicao] =
     useState<Prioridade>('media');
@@ -234,26 +235,12 @@ function App() {
         />
 
         {/* Seletor controlado: a escolha atual fica no estado prioridade. */}
-        <div className="campo-prioridade">
-          <label htmlFor="prioridade">Prioridade</label>
-          <select
-            id="prioridade"
-            value={prioridade}
-            onChange={(evento) => {
-              const valor = evento.target.value;
-
-              // Valida o texto recebido do HTML antes de atualizar o estado tipado.
-              if (valor === 'baixa' || valor === 'media' || valor === 'alta') {
-                setPrioridade(valor);
-              }
-            }}
-          >
-            <option value="baixa">Baixa</option>
-            <option value="media">Média</option>
-            <option value="alta">Alta</option>
-          </select>
-        </div>
-
+        {/* Atualiza a prioridade da próxima tarefa. */}
+        <SeletorPrioridade
+          id="prioridade"
+          valor={prioridade}
+          onChange={setPrioridade}
+        />
         {/* disabled impede enviar um campo vazio ou contendo apenas espaços. */}
         <button type="submit" disabled={!novaTarefa.trim()}>
           Adicionar
@@ -306,42 +293,16 @@ function App() {
           <li key={tarefa.id}>
             {/* O ternário escolhe entre o formulário de edição e a visualização. */}
             {idEmEdicao === tarefa.id ? (
-              <form className="edicao" onSubmit={salvarEdicao}>
-                <label htmlFor={`editar-${tarefa.id}`}>Editar tarefa</label>
-                {/* autoFocus foca o campo ao abrir; Escape descarta o rascunho. */}
-                <input
-                  id={`editar-${tarefa.id}`}
-                  autoFocus
-                  value={textoEmEdicao}
-                  onChange={(evento) => setTextoEmEdicao(evento.target.value)}
-                  onKeyDown={(evento) => {
-                    if (evento.key === 'Escape') setIdEmEdicao(null);
-                  }}
-                />
-                {/* Permite mudar a prioridade sem alterar a tarefa até salvar. */}
-                <label htmlFor={`prioridade-${tarefa.id}`}>Prioridade</label>
-
-                <select
-                  id={`prioridade-${tarefa.id}`}
-                  value={prioridadeEmEdicao}
-                  onChange={(evento) => {
-                    const valor = evento.target.value;
-
-                    if (valor === 'baixa' || valor === 'media' || valor === 'alta') {
-                      setPrioridadeEmEdicao(valor);
-                    }
-                  }}
-                >
-                  <option value="baixa">Baixa</option>
-                  <option value="media">Média</option>
-                  <option value="alta">Alta</option>
-                </select>
-                <button type="submit" disabled={!textoEmEdicao.trim()}>Salvar</button>
-                {/* type="button" impede que Cancelar envie o formulário. */}
-                <button type="button" className="cancelar" onClick={() => setIdEmEdicao(null)}>
-                  Cancelar
-                </button>
-              </form>
+              // O formulário recebe o rascunho e as ações; o estado fica no App.
+              <FormularioEdicao
+                id={tarefa.id}
+                texto={textoEmEdicao}
+                prioridade={prioridadeEmEdicao}
+                onTextoChange={setTextoEmEdicao}
+                onPrioridadeChange={setPrioridadeEmEdicao}
+                onSalvar={salvarEdicao}
+                onCancelar={() => setIdEmEdicao(null)}
+              />
             ) : (
               // Envia os dados e as ações ao cartão; o estado continua no App.
               <ItemTarefa
